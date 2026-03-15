@@ -18,7 +18,8 @@ export async function POST(req: Request) {
     
     const privateKey = process.env.AGENT_PRIVATE_KEY;
     const agentId = (process.env.AGENT_ID || "258").trim();
-    const registryAddress = (process.env.IDENTITY_REGISTRY || "0x556089008Fc0a60cD09390Eca93477ca254A5522").trim();
+    // Using the new contract address provided by the user: 0xd6DC2dD83Be8F3A9b199c2d1B555845A99b4E560
+    const registryAddress = (process.env.RUNCLUB_AGENT_IDENTITY_ADDRESS || process.env.IDENTITY_REGISTRY || "0xd6DC2dD83Be8F3A9b199c2d1B555845A99b4E560").trim();
     
     // Clean the private key (remove quotes or spaces if any)
     const cleanPrivateKey = privateKey?.trim().replace(/^["']|["']$/g, '');
@@ -71,7 +72,9 @@ export async function POST(req: Request) {
       to: registryAddress,
       data: encodedData,
       value: ethers.parseEther("0.000001"), 
-      gasLimit: 600000 // Slightly higher for complex execution
+      gasLimit: 1000000, // Increased to 1M as requested
+      maxPriorityFeePerGas: ethers.parseUnits("2", "gwei"),
+      maxFeePerGas: ethers.parseUnits("10", "gwei")
     });
     
     console.log(`Transaction submitted! Hash: ${tx.hash}`);
