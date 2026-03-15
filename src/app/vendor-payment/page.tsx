@@ -17,7 +17,7 @@ export default function VendorPaymentDashboard() {
   const [receipt, setReceipt] = useState<any>(null);
 
   // Default vendor provided hardcoded!
-  const targetVendorAddress = "0xBD361c9aF5b7B036ADe01399786F7134DA784fD8";
+  let targetVendorAddress = "0xBD361c9aF5b7B036ADe01399786F7134DA784fD8";
 
   const handlePurchase = async (item: any) => {
     setSelectedItem(item);
@@ -46,9 +46,12 @@ export default function VendorPaymentDashboard() {
           price: data.price,
           vendor: data.vendorAddress
         });
+      } else {
+        alert("Transaction Failed on Blockchain: " + data.error);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Payment failed", e);
+      alert("Payment API Error.");
     }
 
     setIsPaying(false);

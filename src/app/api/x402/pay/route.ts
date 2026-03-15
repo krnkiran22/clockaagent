@@ -17,36 +17,29 @@ export async function POST(req: Request) {
     
     let txHash = "";
 
-    try {
-      // Connect our wallet using the custom private key
-      const wallet = new ethers.Wallet(privateKey, provider);
-      
-      // Construct the x402 tracking payload so the GOAT indexer can identify the merchant payment
-      const x402Payload = JSON.stringify({
+    // Connect our wallet using the custom private key
+    const wallet = new ethers.Wallet(privateKey, provider);
+    
+    // Construct the x402 tracking payload so the GOAT indexer can identify the merchant payment
+    const x402Payload = JSON.stringify({
         merchant_id: process.env.X402_MERCHANT_ID || "0xgokkull",
         api_key: process.env.X402_API_KEY,
         protocol: "x402_payment"
       });
 
-      // We send a tiny microtransaction of raw native gas (0.01) purely to trigger an on-chain event 
+      // We send a tiny microtransaction of raw native gas (0.2) purely to trigger an on-chain event 
       // over to the vendor's public key as proof of x402 payment execution.
       // We append the custom x402 payload straight into the hex 'data' field for the dashboard to parse.
       const tx = await wallet.sendTransaction({
         to: vendorAddress,
-        value: ethers.parseEther("0.01"),
+        value: ethers.parseEther("0.2"),
         data: ethers.hexlify(ethers.toUtf8Bytes(x402Payload))
       });
       
-      // Note: We are purposely NOT 'await tx.wait()'ing here because we want the UI 
-      // to feel instantly snappy for the demo. We immediately return the hash!
-      txHash = tx.hash;
+      // Wait for it to be confirmed on the blockchain so it 100% shows up on the explorer
+      await tx.wait();
       
-    } catch (ethersErr: any) {
-       console.error("Ethers transaction failed! Falling back to realistic mock TxHash for demo safety.", ethersErr);
-       // Hackathon Fallback: If the user wallet runs out of gas or the RPC rate limits during the live demo,
-       // we generate a mathematically valid-looking mock hash to keep the flow pristine.
-       txHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    }
+      txHash = tx.hash;
 
     return NextResponse.json({ 
        success: true, 
