@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       
       // Basic /start response
       if (text.startsWith("/start")) {
-        replyText = "🤖 *Cloka Protocol Agent Online*\n\nI am listening natively from my contract deployment on Vercel!\n\n_Available Commands:_\n`/status` - Check current runner queue\n`/trigger` - Force finalization of the run queue";
+        replyText = "🤖 <b>Cloka Protocol Agent Online</b>\n\nI am listening natively from my contract deployment on Vercel!\n\n<i>Available Commands:</i>\n<code>/status</code> - Check current runner queue\n<code>/trigger</code> - Force finalization of the run queue";
       } 
       // Telegram `/status` command to read DB
       else if (text.startsWith("/status")) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           await dbConnect();
           const count = await Registration.countDocuments();
           
-          replyText = `📊 *Cloka Protocol Live Status*\n\nThere are currently *${count}* runners registered in the queue waiting for the agent to execute their commitment scores.`;
+          replyText = `📊 <b>Cloka Protocol Live Status</b>\n\nThere are currently <b>${count}</b> runners registered in the queue waiting for the agent to execute their commitment scores.`;
         } catch (e: any) {
           replyText = "❌ Agent Error: Failed to connect to the registry database.";
         }
@@ -51,7 +51,22 @@ export async function POST(req: Request) {
 
            // Always output the styled payload regardless of DB size for UI demo safety
            // Format message specifically for telegram output (HACKATHON OVERRIDE)
-           replyText = `*🚨 CLOKA RUN QUEUE HAS FORCIBLY CLOSED & FINALIZED VIA TELEGRAM AGENT COMMAND!*\n\n*🎉 CONFIRMED RUNNERS*\n1. @siri_chandhana_k 🏆 (99 pts)\n2. @Manic_don 🏆 (95 pts)\n3. @nagipragalathan 🏆 (88 pts)\n4. @krnkiran22 🏆 (85 pts)\n\n*❌ WAITLIST PROCESSED:*\n@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔\n\n_Deposits are successfully locked in!_`;
+           replyText = `🚨 <b>CLOKA RUN QUEUE HAS FORCIBLY CLOSED & FINALIZED VIA TELEGRAM AGENT COMMAND!</b>\n\n🎉 <b>CONFIRMED RUNNERS</b>\n1. @siri_chandhana_k 🏆 (99 pts)\n2. @Manic_don 🏆 (95 pts)\n3. @nagipragalathan 🏆 (88 pts)\n4. @krnkiran22 🏆 (85 pts)\n\n<i>Deposits are successfully locked in!</i>`;
+           
+           const secondaryText = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔`;
+           
+           // Double manual fetch explicitly for /trigger to bypass replyText single block
+           await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ chat_id: chatId, text: replyText, parse_mode: "HTML" }),
+           });
+           await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ chat_id: chatId, text: secondaryText, parse_mode: "HTML" }),
+           });
+           replyText = ""; // Blank out replyText so standard pipeline skips the duplicated post
         } catch (e: any) {
            replyText = `❌ Agent Allocation Error: ${e.message}`;
         }
@@ -65,7 +80,7 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             chat_id: chatId,
             text: replyText,
-            parse_mode: "Markdown",
+            parse_mode: "HTML",
           }),
         });
       }

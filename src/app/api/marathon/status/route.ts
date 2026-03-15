@@ -40,35 +40,41 @@ export async function POST(req: Request) {
 
     // 4. Construct Telegram Payload from Confirmed list 
     // Hackathon specific override! Omit DB and specifically format the fun demo team list
-    const telegramMessage = `*🚨 CLOKA RUN QUEUE HAS CLOSED & FINALIZED!*
+    const confirmedMessage = `🚨 <b>CLOKA RUN QUEUE HAS CLOSED & FINALIZED!</b>
 
 The maximum spot threshold has been reached. Runner Identities have been processed on-chain using Commitment Score sorting.
 
-*🎉 CONFIRMED RUNNERS* 
+🎉 <b>CONFIRMED RUNNERS</b> 
 1. @siri_chandhana_k 🏆 (99 pts)
 2. @Manic_don 🏆 (95 pts)
 3. @nagipragalathan 🏆 (88 pts)
 4. @krnkiran22 🏆 (85 pts)
 
-*❌ WAITLIST PROCESSED:*
-@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔
-
-*Instructions:*
+<b>Instructions:</b>
 x402 Deposits have been logged for confirmed runners. You can join the marathon! Further details have been sent to your email. Be there on time, or forfeit your deposit to the community treasury!
 
-_Protocol Automated Execution. 🤖_`;
+<i>Protocol Automated Execution. 🤖</i>`;
+
+    const waitlistMessage = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔`;
 
     // 5. Fire Telegram Announcement
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_GROUP_ID;
 
     if (botToken && chatId) {
-      const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      // Message 1
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text: telegramMessage, parse_mode: "Markdown" }),
+        body: JSON.stringify({ chat_id: chatId, text: confirmedMessage, parse_mode: "HTML" }),
       });
-      // Handle silently as to not break the API route returned
+      
+      // Separate Message 2 to ensure tag pings properly
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: waitlistMessage, parse_mode: "HTML" }),
+      });
     }
 
     return NextResponse.json({ 
