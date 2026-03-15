@@ -27,12 +27,12 @@ export async function POST(req: Request) {
         protocol: "x402_payment"
       });
 
-      // We send a tiny microtransaction of raw native gas (0.2) purely to trigger an on-chain event 
+      // We send a tiny microtransaction of raw native gas (0.00001) purely to trigger an on-chain event 
       // over to the vendor's public key as proof of x402 payment execution.
       // We append the custom x402 payload straight into the hex 'data' field for the dashboard to parse.
       const tx = await wallet.sendTransaction({
         to: vendorAddress,
-        value: ethers.parseEther("0.2"),
+        value: ethers.parseEther("0.00001"),
         data: ethers.hexlify(ethers.toUtf8Bytes(x402Payload))
       });
       
