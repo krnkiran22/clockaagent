@@ -21,11 +21,20 @@ export async function POST(req: Request) {
       // Connect our wallet using the custom private key
       const wallet = new ethers.Wallet(privateKey, provider);
       
+      // Construct the x402 tracking payload so the GOAT indexer can identify the merchant payment
+      const x402Payload = JSON.stringify({
+        merchant_id: process.env.X402_MERCHANT_ID || "0xgokkull",
+        api_key: process.env.X402_API_KEY,
+        protocol: "x402_payment"
+      });
+
       // We send a tiny microtransaction of raw native gas (0.01) purely to trigger an on-chain event 
       // over to the vendor's public key as proof of x402 payment execution.
+      // We append the custom x402 payload straight into the hex 'data' field for the dashboard to parse.
       const tx = await wallet.sendTransaction({
         to: vendorAddress,
-        value: ethers.parseEther("0.01"), 
+        value: ethers.parseEther("0.01"),
+        data: ethers.hexlify(ethers.toUtf8Bytes(x402Payload))
       });
       
       // Note: We are purposely NOT 'await tx.wait()'ing here because we want the UI 
