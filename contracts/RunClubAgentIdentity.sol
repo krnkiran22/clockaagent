@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IERC8004.sol";
 
-contract ClokaAgentIdentity is IERC8004, Ownable {
+contract RunClubAgentIdentity is IERC8004, Ownable {
     bytes32 public immutable AGENT_ID;
     
     // Vendor Registry for storing payout methods
@@ -23,7 +23,7 @@ contract ClokaAgentIdentity is IERC8004, Ownable {
     event VendorPaid(address indexed vendor, uint256 amount, string method);
     
     constructor() Ownable(msg.sender) {
-        AGENT_ID = keccak256(abi.encodePacked("CLOKA_PROTOCOL_MAIN_AGENT", block.timestamp));
+        AGENT_ID = keccak256(abi.encodePacked("RUN_CLUB_AGENT_IDENTITY", block.timestamp));
     }
 
     // ERC-8004 Compliance
@@ -36,7 +36,7 @@ contract ClokaAgentIdentity is IERC8004, Ownable {
     }
 
     function executePayment(address payable recipient, uint256 amount) external onlyOwner {
-        require(address(this).balance >= amount, "Cloka Treasury: Insufficient funds");
+        require(address(this).balance >= amount, "Run Club Treasury: Insufficient funds");
         recipient.transfer(amount);
     }
     

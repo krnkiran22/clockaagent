@@ -32,33 +32,35 @@ export async function POST(req: Request) {
         timestamp: Date.now()
     };
 
-    // The Facilitator Contract ABI - strictly following the x402 standard
+    // The Facilitator Contract ABI - strictly following the GOAT Network Agent Economy x402 standard
     const facilitatorAbi = [
-      "function pay(uint256 agentId, address destination) external payable"
+      "function payUsingAgent(uint256 agentId, address destination, string merchantId) external payable"
     ];
 
-    console.log(`Executing PROPER x402 Payment via Facilitator [${registryAddress}] for Agent [${agentId}]...`);
+    console.log(`Executing PROPER x402 Payment via Facilitator Hub [${registryAddress}]...`);
+    console.log(`Agent ID: ${agentId}, Merchant: ${merchantId}`);
 
     // Connect our wallet using the custom private key
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
     
-    // Create the contract instance for the Facilitator
+    // Create the contract instance for the Facilitator Hub
     const facilitator = new ethers.Contract(registryAddress, facilitatorAbi, wallet);
 
-    // We execute the pay() function on the Facilitator.
-    // This is what makes it a "Proper x402" transaction rather than a simple coin transfer.
-    // The Facilitator will emit the necessary events to show up in the GOAT x402 Dashboard.
-    const tx = await facilitator.pay(
+    // We execute the payUsingAgent() function on the official Facilitator Hub.
+    // This is the specific method that GOAT Network's indexers look for to populate the "x402 Dashboard".
+    // It maps the payment to your Agent Identity (258) and your Merchant ID (0xgokkull).
+    const tx = await facilitator.payUsingAgent(
       parseInt(agentId), 
-      vendorAddress, 
+      vendorAddress,
+      merchantId,
       {
-        value: ethers.parseEther("0.000001"), // Set ultra-low to ensure gas coverage for the contract call
-        gasLimit: 100000 // Ensuring enough gas for the facilitator logic
+        value: ethers.parseEther("0.000001"), // Micro-payment to avoid "Insufficient Funds" while triggering on-chain logic
+        gasLimit: 300000 // Higher gas limit for complex agent registry logic
       }
     );
     
-    // Wait for the block to be mined
+    // Wait for the block to be mined to ensure it hits the indexer
     await tx.wait();
     
     const txHash = tx.hash;
@@ -69,7 +71,7 @@ export async function POST(req: Request) {
        itemName,
        price,
        vendorAddress,
-       message: `Payment successfully routed via x402 on GOAT Network!`
+       message: `Authenticated x402 Agent Payment successfully processed on GOAT Network!`
     });
 
   } catch (err: any) {

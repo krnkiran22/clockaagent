@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ClokaRunnerIdentity is ERC721, Ownable {
+contract RunClubRunnerIdentity is ERC721, Ownable {
     uint256 public nextRunnerId;
 
     struct RunnerData {
@@ -22,7 +22,7 @@ contract ClokaRunnerIdentity is ERC721, Ownable {
     event RunVerified(uint256 indexed runnerId, bytes32 gpsHash, uint256 newScore);
     event PenaltyApplied(uint256 indexed runnerId, uint256 newScore);
 
-    constructor() ERC721("ClokaRunnerIdentity", "RUNNER") Ownable(msg.sender) {}
+    constructor() ERC721("RunClubRunnerIdentity", "RUNNER") Ownable(msg.sender) {}
 
     function mintIdentity(address _to, string memory _stravaId) external onlyOwner returns (uint256) {
         uint256 runnerId = nextRunnerId++;
