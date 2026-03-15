@@ -17,8 +17,8 @@ export async function POST(req: Request) {
     const merchantId = process.env.GOATX402_MERCHANT_ID;
     
     const privateKey = process.env.AGENT_PRIVATE_KEY;
-    const agentId = process.env.AGENT_ID || "258";
-    const registryAddress = process.env.IDENTITY_REGISTRY || "0x556089008Fc0a60cD09390Eca93477ca254A5522";
+    const agentId = (process.env.AGENT_ID || "258").trim();
+    const registryAddress = (process.env.IDENTITY_REGISTRY || "0x556089008Fc0a60cD09390Eca93477ca254A5522").trim();
     
     // Clean the private key (remove quotes or spaces if any)
     const cleanPrivateKey = privateKey?.trim().replace(/^["']|["']$/g, '');
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     const tx = await facilitator.payUsingAgent(
       BigInt(agentId), 
       vendorAddress,
-      merchantId || "0xgokkull",
+      (merchantId || "0xgokkull").trim(),
       {
         value: ethers.parseEther("0.000001"), 
         gasLimit: 500000 
