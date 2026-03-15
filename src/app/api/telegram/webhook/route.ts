@@ -53,7 +53,7 @@ export async function POST(req: Request) {
            // Format message specifically for telegram output (HACKATHON OVERRIDE)
            replyText = `🚨 <b>CLOKA RUN QUEUE HAS FORCIBLY CLOSED & FINALIZED VIA TELEGRAM AGENT COMMAND!</b>\n\n🎉 <b>CONFIRMED RUNNERS</b>\n1. @siri_chandhana_k 🏆 (99 pts)\n2. @Manic_don 🏆 (95 pts)\n3. @nagipragalathan 🏆 (88 pts)\n4. @krnkiran22 🏆 (85 pts)\n\n<i>Deposits are successfully locked in!</i>`;
            
-           const secondaryText = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔`;
+           const secondaryText = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Agent computed your only consistent marathon lately has been on Netflix. Get some real miles in first! Application denied. 🍿🏃`;
            
            // Double manual fetch explicitly for /trigger to bypass replyText single block
            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {

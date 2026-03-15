@@ -55,7 +55,7 @@ x402 Deposits have been logged for confirmed runners. You can join the marathon!
 
 <i>Protocol Automated Execution. 🤖</i>`;
 
-    const waitlistMessage = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔`;
+    const waitlistMessage = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Agent computed your only consistent marathon lately has been on Netflix. Get some real miles in first! Application denied. 🍿🏃`;
 
     // 5. Fire Telegram Announcement
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
