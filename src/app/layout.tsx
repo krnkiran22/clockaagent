@@ -14,8 +14,8 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cloka Protocol | The autonomous run club",
-  description: "The run club that replaces its own organizer. An autonomous on-chain agent that runs Cloka without a human touching anything.",
+  title: "Run Club Agent | The autonomous run club",
+  description: "The run club that replaces its own organizer. An autonomous on-chain agent that runs Run Club without a human touching anything.",
   keywords: ["blockchain", "run club", "autonomous agent", "GOAT network", "web3", "fitness", "x402"],
 };
 

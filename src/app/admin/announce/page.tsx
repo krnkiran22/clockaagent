@@ -31,8 +31,8 @@ export default function AdminAnnounce() {
         isRaining: false,
         isConfirmed: isGood,
         announcementText: isGood 
-          ? `[Agent Announcement] Cloka Sunday Long Run is officially CONFIRMED. \n\n📍 Date: ${date} @ ${time}\n🗺️ Location: ${location}\n👥 Max Spots: ${maxRunners} Runners\n⛅ Temp: 24.5°C | 💨 AQI: 65\n\n🎒 Perks: Drinks and snacks (protein bars) will be provided!\n\nQueue processing triggered. Top commitment scores will be confirmed.`
-          : `[Agent Notice] Cloka Run cancelled for ${date}.\n\nReason: AQI Spiked to Hazardous levels. Protocol suspended.`,
+          ? `[Agent Announcement] Run Club Sunday Long Run is officially CONFIRMED. \n\n📍 Date: ${date} @ ${time}\n🗺️ Location: ${location}\n👥 Max Spots: ${maxRunners} Runners\n⛅ Temp: 24.5°C | 💨 AQI: 65\n\n🎒 Perks: Drinks and snacks (protein bars) will be provided!\n\nQueue processing triggered. Top commitment scores will be confirmed.`
+          : `[Agent Notice] Run Club Run cancelled for ${date}.\n\nReason: AQI Spiked to Hazardous levels. Protocol suspended.`,
         reason: isGood ? "Conditions optimal." : "Hazardous AQI."
       });
       setIsEvaluating(false);

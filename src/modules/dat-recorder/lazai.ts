@@ -23,7 +23,7 @@ export async function mintDataAttestationToken(payload: LazAIDatPayload): Promis
   const mockTxHash = `0x_goat_dat_${Math.random().toString(16).slice(2)}`;
 
   return {
-    datId: `DAT-CLOKA-${Date.now()}`,
+    datId: `DAT-RUN CLUB-${Date.now()}`,
     txHash: mockTxHash,
     ipfsUri: mockIpfsHash
   };

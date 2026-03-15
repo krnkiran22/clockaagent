@@ -11,7 +11,7 @@ export interface AqiData {
 }
 
 /**
- * Fetch mock weather data for Chennai (Cloka location)
+ * Fetch mock weather data for Chennai (Run Club location)
  */
 export async function fetchLiveWeather(): Promise<WeatherData> {
   // In production:

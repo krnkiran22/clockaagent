@@ -57,7 +57,7 @@ export function Hero() {
             <div className="w-3 h-3 rounded-full bg-red-500" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="ml-2 text-xs font-mono text-zinc-500">cloka-agent-runtime</span>
+            <span className="ml-2 text-xs font-mono text-zinc-500">runclub-agent-runtime</span>
           </div>
           <div className="font-mono text-sm text-zinc-300 space-y-2 h-[200px] overflow-hidden flex flex-col justify-end">
              <div className="text-zinc-500">{"// 06:00 AM IST - Sunday Protocol Triggered"}</div>

@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     // 4. Construct Telegram Payload from Confirmed list 
     // Hackathon specific override! Omit DB and specifically format the fun demo team list
-    const confirmedMessage = `🚨 <b>CLOKA RUN QUEUE HAS CLOSED & FINALIZED!</b>
+    const confirmedMessage = `🚨 <b>RUN CLUB RUN QUEUE HAS CLOSED & FINALIZED!</b>
 
 The maximum spot threshold has been reached. Runner Identities have been processed on-chain using Commitment Score sorting.
 

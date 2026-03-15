@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       
       // Basic /start response
       if (text.startsWith("/start")) {
-        replyText = "🤖 <b>Cloka Protocol Agent Online</b>\n\nI am listening natively from my contract deployment on Vercel!\n\n<i>Available Commands:</i>\n<code>/status</code> - Check current runner queue\n<code>/trigger</code> - Force finalization of the run queue";
+        replyText = "🤖 <b>Run Club Agent Agent Online</b>\n\nI am listening natively from my contract deployment on Vercel!\n\n<i>Available Commands:</i>\n<code>/status</code> - Check current runner queue\n<code>/trigger</code> - Force finalization of the run queue";
       } 
       // Telegram `/status` command to read DB
       else if (text.startsWith("/status")) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           await dbConnect();
           const count = await Registration.countDocuments();
           
-          replyText = `📊 <b>Cloka Protocol Live Status</b>\n\nThere are currently <b>${count}</b> runners registered in the queue waiting for the agent to execute their commitment scores.`;
+          replyText = `📊 <b>Run Club Agent Live Status</b>\n\nThere are currently <b>${count}</b> runners registered in the queue waiting for the agent to execute their commitment scores.`;
         } catch (e: any) {
           replyText = "❌ Agent Error: Failed to connect to the registry database.";
         }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
            // Always output the styled payload regardless of DB size for UI demo safety
            // Format message specifically for telegram output (HACKATHON OVERRIDE)
-           replyText = `🚨 <b>CLOKA RUN QUEUE HAS FORCIBLY CLOSED & FINALIZED VIA TELEGRAM AGENT COMMAND!</b>\n\n🎉 <b>CONFIRMED RUNNERS</b>\n1. @siri_chandhana_k 🏆 (99 pts)\n2. @Manic_don 🏆 (95 pts)\n3. @nagipragalathan 🏆 (88 pts)\n4. @krnkiran22 🏆 (85 pts)\n\n<i>Deposits are successfully locked in!</i>`;
+           replyText = `🚨 <b>RUN CLUB RUN QUEUE HAS FORCIBLY CLOSED & FINALIZED VIA TELEGRAM AGENT COMMAND!</b>\n\n🎉 <b>CONFIRMED RUNNERS</b>\n1. @siri_chandhana_k 🏆 (99 pts)\n2. @Manic_don 🏆 (95 pts)\n3. @nagipragalathan 🏆 (88 pts)\n4. @krnkiran22 🏆 (85 pts)\n\n<i>Deposits are successfully locked in!</i>`;
            
            const secondaryText = `❌ <b>WAITLIST PROCESSED:</b>\n@gokkull — Agent computed your only consistent marathon lately has been on Netflix. Get some real miles in first! Application denied. 🍿🏃`;
            

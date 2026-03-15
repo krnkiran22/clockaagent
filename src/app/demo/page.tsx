@@ -22,7 +22,7 @@ export default function DemoPage() {
     setLogs([]);
     setStep(1); // Evaluation
     
-    addLog("[06:00:01] ❯ Waking Agent (Cloka Protocol on GOAT L2)...", 500);
+    addLog("[06:00:01] ❯ Waking Agent (Run Club Agent on GOAT L2)...", 500);
     addLog("[06:00:02] ❯ Fetching Weather: Temp 24.5°C, Rain: False", 1500);
     addLog("[06:00:03] ❯ Fetching AQI: 65 (Moderate)", 2000);
     
@@ -73,7 +73,7 @@ export default function DemoPage() {
           <div className="glass rounded-2xl p-8 border border-zinc-800">
             <h1 className="text-3xl font-bold mb-2 text-white">Sunday Simulation</h1>
             <p className="text-zinc-400 mb-8 max-w-sm">
-              Trigger the Cloka Protocol agent exactly as it would wake up at 6:00 AM on Sunday morning.
+              Trigger the Run Club Agent agent exactly as it would wake up at 6:00 AM on Sunday morning.
             </p>
 
             <button
@@ -125,7 +125,7 @@ export default function DemoPage() {
             <div className="w-3 h-3 rounded-full bg-red-500" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="ml-2 text-xs font-mono text-zinc-500">cloka-agent-runtime</span>
+            <span className="ml-2 text-xs font-mono text-zinc-500">runclub-agent-runtime</span>
             {isRunning && <span className="ml-auto flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF4500] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF4500]"></span>

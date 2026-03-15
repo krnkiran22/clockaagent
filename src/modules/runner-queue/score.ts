@@ -12,7 +12,7 @@ export interface RunnerStats {
  * - Total Runs: +5 per run (max 50)
  * - Distance: +1 per 10km (max 20)
  * - Pace Consistency: +10 if variance < 1min/km
- * - No Shows: -15 per absence at a confirmed Cloka event
+ * - No Shows: -15 per absence at a confirmed Run Club event
  */
 export function calculateCommitmentScore(stats: RunnerStats): number {
   let score = 20; // Base score for connecting wallet/Strava

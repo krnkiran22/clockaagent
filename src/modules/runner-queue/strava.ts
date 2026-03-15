@@ -40,7 +40,7 @@ export async function fetchRunnerHistory(accessToken: string): Promise<StravaRun
   return [
     {
       id: 101,
-      name: "Sunday Long Run - Cloka",
+      name: "Sunday Long Run - Run Club",
       distance: 10000,
       moving_time: 3600,
       type: "Run",

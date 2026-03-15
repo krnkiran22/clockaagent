@@ -10,7 +10,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-[#FF4500]"></div>
-            <span className="font-bold tracking-tighter text-lg">CLOKA PROTOCOL</span>
+            <span className="font-bold tracking-tighter text-lg">RUN CLUB AGENT</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
             <a href="#problem" className="hover:text-white transition-colors">The Problem</a>
@@ -64,7 +64,7 @@ export default function Home() {
             </div>
             <h2 className="text-4xl font-bold tracking-tight text-white">Vendors Don't Need Crypto.</h2>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              While the Cloka Protocol operates entirely on-chain via x402, vendors don't manage wallets unless they want to. 
+              While the Run Club Agent operates entirely on-chain via x402, vendors don't manage wallets unless they want to. 
               The payment gateway bridge routes GOAT settlement directly to their preferred method.
             </p>
             <ul className="space-y-4 pt-4">

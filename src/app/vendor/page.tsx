@@ -34,7 +34,7 @@ export default function VendorRegistration() {
           </div>
           <h1 className="text-4xl font-bold tracking-tight">How should the Agent pay you?</h1>
           <p className="text-zinc-400 font-light max-w-lg mx-auto">
-             Cloka runs on an autonomous x402 module. There are no invoices or human approvals. You register your service and your routing preference.
+             Run Club runs on an autonomous x402 module. There are no invoices or human approvals. You register your service and your routing preference.
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export default function VendorRegistration() {
                     <label className="text-xs font-mono text-zinc-500 mb-2 block">
                       {payoutMethod === "fiat_card" ? "BANK VPA / ALIAS (Mocked)" : "USDT WALLET ADDRESS"}
                     </label>
-                    <input type="text" placeholder={payoutMethod === "fiat_card" ? "cloka_vendor@upi" : "0x..."} className="w-full bg-black border border-zinc-800 rounded-xl p-4 text-white font-mono focus:outline-none focus:border-purple-500 transition-colors" />
+                    <input type="text" placeholder={payoutMethod === "fiat_card" ? "runclub_vendor@upi" : "0x..."} className="w-full bg-black border border-zinc-800 rounded-xl p-4 text-white font-mono focus:outline-none focus:border-purple-500 transition-colors" />
                   </div>
                 </div>
 
@@ -134,7 +134,7 @@ export default function VendorRegistration() {
                 </div>
                 <h2 className="text-2xl font-bold">Route Configured</h2>
                 <p className="text-zinc-400 max-w-sm mx-auto">
-                  The Cloka Protocol will automatically execute payments to this route within 60 seconds of any run completion.
+                  The Run Club Agent will automatically execute payments to this route within 60 seconds of any run completion.
                 </p>
                 <div className="mt-8 p-4 rounded-xl bg-zinc-900 border border-zinc-800 font-mono text-sm inline-block mx-auto text-left">
                   <p className="text-zinc-500">Registry Hash</p>

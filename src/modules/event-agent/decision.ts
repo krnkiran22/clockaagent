@@ -37,13 +37,13 @@ export function evaluateRunDecision(weather: WeatherData, aqi: AqiData): Decisio
     return {
       isConfirmed: false,
       reason: reasons.join(" "),
-      announcementText: `[Agent Notice] Cloka Run cancelled for Sunday.\n\nReason: ${reasons.join(" ")}\n\nx402 Deposits have been automatically returned to confirmed runners. See you next week. Protocol out.`
+      announcementText: `[Agent Notice] Run Club Run cancelled for Sunday.\n\nReason: ${reasons.join(" ")}\n\nx402 Deposits have been automatically returned to confirmed runners. See you next week. Protocol out.`
     };
   }
 
   return {
     isConfirmed: true,
     reason: "Conditions optimal.",
-    announcementText: `[Agent Announcement] Cloka Sunday Long Run is officially CONFIRMED.\n\nTemp: ${weather.tempCelsius}°C | AQI: ${aqi.index}\n\nQueue processing triggered. Top 130 commitment scores are receiving x402 payment requests now. Run fast. Protocol active.`
+    announcementText: `[Agent Announcement] Run Club Sunday Long Run is officially CONFIRMED.\n\nTemp: ${weather.tempCelsius}°C | AQI: ${aqi.index}\n\nQueue processing triggered. Top 130 commitment scores are receiving x402 payment requests now. Run fast. Protocol active.`
   };
 }
