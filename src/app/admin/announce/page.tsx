@@ -7,6 +7,8 @@ import { Send, Cloud, Thermometer, Wind, AlertTriangle, CheckCircle2 } from "luc
 export default function AdminAnnounce() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("06:00");
+  const [location, setLocation] = useState("Anna University Ground");
+  const [maxRunners, setMaxRunners] = useState("10");
   const [evaluation, setEvaluation] = useState<any>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
@@ -27,7 +29,7 @@ export default function AdminAnnounce() {
         isRaining: false,
         isConfirmed: isGood,
         announcementText: isGood 
-          ? `[Agent Announcement] Cloka Sunday Long Run is officially CONFIRMED. \n\n📍 Date: ${date} @ ${time}\n⛅ Temp: 24.5°C | 💨 AQI: 65\n\nQueue processing triggered. Top 130 commitment scores are confirmed.`
+          ? `[Agent Announcement] Cloka Sunday Long Run is officially CONFIRMED. \n\n📍 Date: ${date} @ ${time}\n🗺️ Location: ${location}\n👥 Max Spots: ${maxRunners} Runners\n⛅ Temp: 24.5°C | 💨 AQI: 65\n\nQueue processing triggered. Top commitment scores will be confirmed.`
           : `[Agent Notice] Cloka Run cancelled for ${date}.\n\nReason: AQI Spiked to Hazardous levels. Protocol suspended.`,
         reason: isGood ? "Conditions optimal." : "Hazardous AQI."
       });
@@ -93,10 +95,28 @@ export default function AdminAnnounce() {
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-[#FF4500] transition-colors" 
               />
             </div>
+            <div>
+              <label className="text-xs font-mono text-zinc-500 mb-2 block">LOCATION / STARTING POINT</label>
+              <input 
+                type="text" 
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-[#FF4500] transition-colors" 
+              />
+            </div>
+            <div>
+              <label className="text-xs font-mono text-zinc-500 mb-2 block">MAX PARTICIPANTS LIMIT</label>
+              <input 
+                type="number" 
+                value={maxRunners}
+                onChange={(e) => setMaxRunners(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-[#FF4500] transition-colors" 
+              />
+            </div>
 
             <button
               onClick={handleEvaluate}
-              disabled={isEvaluating || !date || !time}
+              disabled={isEvaluating || !date || !time || !location || !maxRunners}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 hover:border-[#FF4500] border border-zinc-800 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50"
             >
               {isEvaluating ? (
