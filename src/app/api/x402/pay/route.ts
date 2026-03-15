@@ -4,93 +4,112 @@ import { ethers } from 'ethers';
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { itemId, itemName, price, vendorAddress } = body;
+    const { itemId, itemName, price, vendorAddress, amountWei } = body;
+
+    // Log the incoming request for debugging
+    console.log(`[x402 Payout] Initiating for ${itemName} to ${vendorAddress}`);
 
     if (!vendorAddress) {
       return NextResponse.json({ success: false, error: "Missing required vendorAddress in request body." }, { status: 400 });
     }
 
-    // The Official GOAT x402 API configuration
-    const rpcUrl = process.env.GOATX402_API_URL || "https://rpc.testnet3.goat.network";
-    const apiKey = process.env.GOATX402_API_KEY;
-    const apiSecret = process.env.GOATX402_API_SECRET;
-    const merchantId = process.env.GOATX402_MERCHANT_ID;
-    
-    const privateKey = process.env.AGENT_PRIVATE_KEY;
-    const agentId = (process.env.AGENT_ID || "258").trim();
-    // Using the new contract address provided by the user: 0xd6DC2dD83Be8F3A9b199c2d1B555845A99b4E560
-    const registryAddress = (process.env.RUNCLUB_AGENT_IDENTITY_ADDRESS || process.env.IDENTITY_REGISTRY || "0xd6DC2dD83Be8F3A9b199c2d1B555845A99b4E560").trim();
-    
-    // Clean the private key (remove quotes or spaces if any)
-    const cleanPrivateKey = privateKey?.trim().replace(/^["']|["']$/g, '');
-    
-    if (!cleanPrivateKey || cleanPrivateKey.length < 32) {
-      return NextResponse.json({ success: false, error: "Invalid Agent Private Key provided." }, { status: 500 });
+    if (!ethers.isAddress(vendorAddress)) {
+      return NextResponse.json({ success: false, error: "Invalid vendorAddress." }, { status: 400 });
     }
-    
-    // Instead of raw raw Ethereum transactions, we now use the GOAT Agent x402 Gateway API! 
-    const paymentPayload = {
-        agent_id: agentId,
-        identity_registry: registryAddress,
-        merchant_id: merchantId,
-        destination_wallet: vendorAddress,
-        amount: "0.2", // Reinstating higher test amount since API handles funding pool!
-        currency: "GOAT",
-        item_id: itemId,
-        item_name: itemName,
-        timestamp: Date.now()
-    };
 
-    // The Facilitator Contract ABI - strictly following the GOAT Network Agent Economy x402 standard
-    const facilitatorAbi = [
-      "function payUsingAgent(uint256 agentId, address destination, string merchantId) external payable"
+    const rpcUrl = process.env.GOAT_RPC_URL || "https://rpc.testnet3.goat.network";
+    const privateKey = process.env.AGENT_PRIVATE_KEY;
+    const agentContractAddress = process.env.RUNCLUB_AGENT_IDENTITY_ADDRESS;
+
+    const cleanPrivateKey = privateKey?.trim().replace(/^["']|["']$/g, '');
+
+    if (!cleanPrivateKey || cleanPrivateKey.length < 32) {
+      return NextResponse.json({ success: false, error: "Invalid AGENT_PRIVATE_KEY in .env" }, { status: 500 });
+    }
+
+    if (!agentContractAddress || !ethers.isAddress(agentContractAddress)) {
+      return NextResponse.json({ success: false, error: "Invalid RUNCLUB_AGENT_IDENTITY_ADDRESS in .env" }, { status: 500 });
+    }
+
+    const agentAbi = [
+      "function owner() view returns (address)",
+      "function vendors(address) view returns (string name, uint8 preferredMethod, address wallet)",
+      "function registerVendor(string _name, uint8 _method, address _wallet) external",
+      "function payVendor(address _vendorWallet, uint256 _amount) external"
     ];
-
-    console.log(`Executing PROPER x402 Payment via Facilitator Hub [${registryAddress}]...`);
-    console.log(`Agent ID: ${agentId}, Merchant: ${merchantId}`);
 
     console.log(`Connecting to GOAT RPC: ${rpcUrl}`);
     const provider = new ethers.JsonRpcProvider(rpcUrl);
-    
+
     console.log("Initializing Agent Wallet...");
     const wallet = new ethers.Wallet(cleanPrivateKey, provider);
-    
-    console.log(`Loading Facilitator Hub at: ${registryAddress}`);
-    // Create the interface for explicit encoding to ensure data is NOT empty
-    const iface = new ethers.Interface(facilitatorAbi);
-    
-    console.log(`Encoding x402 payload for Hub [${registryAddress}]...`);
-    
-    // Explicitly encode the function data so it is definitely included in the tx
-    const encodedData = iface.encodeFunctionData("payUsingAgent", [
-      BigInt(agentId), 
-      vendorAddress,
-      (merchantId || "0xgokkull").trim()
-    ]);
 
-    const tx = await wallet.sendTransaction({
-      to: registryAddress,
-      data: encodedData,
-      value: ethers.parseEther("0.000001"), 
-      gasLimit: 1000000, // Increased to 1M as requested
-      maxPriorityFeePerGas: ethers.parseUnits("2", "gwei"),
-      maxFeePerGas: ethers.parseUnits("10", "gwei")
+    console.log(`Loading RunClubAgentIdentity at: ${agentContractAddress}`);
+    const agent = new ethers.Contract(agentContractAddress, agentAbi, wallet);
+
+    // Verify Ownership
+    const owner = await agent.owner();
+    if (owner.toLowerCase() !== wallet.address.toLowerCase()) {
+      return NextResponse.json(
+        { success: false, error: "AGENT_PRIVATE_KEY is not the owner of the Run Club Identity contract." },
+        { status: 403 }
+      );
+    }
+
+    // Default to 1 wei if amount is not specified to ensure success with low funds
+    const parsedAmount = amountWei ? BigInt(amountWei) : 1000n; 
+    
+    let registerTxHash: string | null = null;
+    const vendorData = await agent.vendors(vendorAddress);
+    const registeredWallet = vendorData.wallet || ethers.ZeroAddress;
+
+    // 1. Auto-Register Vendor if not already present in the Agent's registry
+    if (registeredWallet.toLowerCase() !== vendorAddress.toLowerCase()) {
+      console.log(`Registering vendor on-chain: ${vendorAddress}`);
+      // Method 2 = WALLET
+      const registerTx = await agent.registerVendor(itemName || "Run Club Merchant", 2, vendorAddress, { 
+        gasLimit: 400000 
+      });
+      await registerTx.wait();
+      registerTxHash = registerTx.hash;
+      console.log(`Vendor registered: ${registerTxHash}`);
+    }
+
+    // 2. Ensure Agent Contract is funded (Top up from Agent's main wallet if needed)
+    let fundTxHash: string | null = null;
+    const contractBal = await provider.getBalance(agentContractAddress);
+    if (contractBal < parsedAmount) {
+      const topUp = (parsedAmount - contractBal) + ethers.parseEther("0.0001"); // Add a small buffer
+      console.log(`Funding agent contract with extra GOAT for payout...`);
+      const fundTx = await wallet.sendTransaction({ 
+        to: agentContractAddress, 
+        value: topUp, 
+        gasLimit: 100000 
+      });
+      await fundTx.wait();
+      fundTxHash = fundTx.hash;
+    }
+
+    // 3. Final x402 Agent Execution Payment
+    console.log(`Executing payVendor via Agent: to=${vendorAddress}, amountWei=${parsedAmount.toString()}`);
+    // We keep gas limit moderate to avoid "Intrinsic Cost" errors with low balances
+    const payTx = await agent.payVendor(vendorAddress, parsedAmount, { 
+        gasLimit: 500000 
     });
-    
-    console.log(`Transaction submitted! Hash: ${tx.hash}`);
-    
-    // Wait for the block to be mined 
-    await tx.wait();
-    
-    const txHash = tx.hash;
+    await payTx.wait();
+
+    console.log(`Payout Successful! Hash: ${payTx.hash}`);
 
     return NextResponse.json({ 
        success: true, 
-       txHash,
+       txHash: payTx.hash,
+       registerTxHash,
+       fundTxHash,
        itemName,
        price,
        vendorAddress,
-       message: `Authenticated x402 Agent Payment successfully processed on GOAT Network!`
+       amountWei: parsedAmount.toString(),
+       message: `Authenticated x402 Agent Payout successful on GOAT Network.`
     });
 
   } catch (err: any) {
