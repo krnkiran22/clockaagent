@@ -55,24 +55,29 @@ export async function POST(req: Request) {
     const wallet = new ethers.Wallet(cleanPrivateKey, provider);
     
     console.log(`Loading Facilitator Hub at: ${registryAddress}`);
-    const facilitator = new ethers.Contract(registryAddress, facilitatorAbi, wallet);
-
-    console.log(`Submitting x402 transaction: Agent=${agentId}, Merchant=${merchantId}, To=${vendorAddress}`);
+    // Create the interface for explicit encoding to ensure data is NOT empty
+    const iface = new ethers.Interface(facilitatorAbi);
     
-    const tx = await facilitator.payUsingAgent(
+    console.log(`Encoding x402 payload for Hub [${registryAddress}]...`);
+    
+    // Explicitly encode the function data so it is definitely included in the tx
+    const encodedData = iface.encodeFunctionData("payUsingAgent", [
       BigInt(agentId), 
       vendorAddress,
-      (merchantId || "0xgokkull").trim(),
-      {
-        value: ethers.parseEther("0.000001"), 
-        gasLimit: 500000 
-      }
-    );
+      (merchantId || "0xgokkull").trim()
+    ]);
+
+    const tx = await wallet.sendTransaction({
+      to: registryAddress,
+      data: encodedData,
+      value: ethers.parseEther("0.000001"), 
+      gasLimit: 600000 // Slightly higher for complex execution
+    });
     
     console.log(`Transaction submitted! Hash: ${tx.hash}`);
     
-    // Wait for the block to be mined to ensure it hits the indexer
-    const receipt = await tx.wait();
+    // Wait for the block to be mined 
+    await tx.wait();
     
     const txHash = tx.hash;
 
