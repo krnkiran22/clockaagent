@@ -15,8 +15,11 @@ export async function POST(req: Request) {
     const agentId = process.env.AGENT_ID || "258";
     const registryAddress = process.env.IDENTITY_REGISTRY || "0x556089008Fc0a60cD09390Eca93477ca254A5522";
     
-    if (!privateKey) {
-      return NextResponse.json({ success: false, error: "Missing Agent Private Key in configuration." }, { status: 500 });
+    // Clean the private key (remove quotes or spaces if any)
+    const cleanPrivateKey = privateKey?.trim().replace(/^["']|["']$/g, '');
+    
+    if (!cleanPrivateKey || cleanPrivateKey.length < 32) {
+      return NextResponse.json({ success: false, error: "Invalid Agent Private Key provided." }, { status: 500 });
     }
     
     // Instead of raw raw Ethereum transactions, we now use the GOAT Agent x402 Gateway API! 
@@ -40,17 +43,17 @@ export async function POST(req: Request) {
     console.log(`Executing PROPER x402 Payment via Facilitator Hub [${registryAddress}]...`);
     console.log(`Agent ID: ${agentId}, Merchant: ${merchantId}`);
 
-    // Connect our wallet using the custom private key
+    console.log(`Connecting to GOAT RPC: ${rpcUrl}`);
     const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const wallet = new ethers.Wallet(privateKey, provider);
     
-    // Create the contract instance for the Facilitator Hub
+    console.log("Initializing Agent Wallet...");
+    const wallet = new ethers.Wallet(cleanPrivateKey, provider);
+    
+    console.log(`Loading Facilitator Hub at: ${registryAddress}`);
     const facilitator = new ethers.Contract(registryAddress, facilitatorAbi, wallet);
 
-    console.log(`Submitting PROPER x402 transaction to Hub [${registryAddress}]...`);
+    console.log(`Submitting x402 transaction: Agent=${agentId}, Merchant=${merchantId}, To=${vendorAddress}`);
     
-    // We execute the payUsingAgent() function on the official Facilitator Hub.
-    // This maps the payment to your Agent Identity (258) and your Merchant ID (0xgokkull).
     const tx = await facilitator.payUsingAgent(
       BigInt(agentId), 
       vendorAddress,
@@ -78,6 +81,7 @@ export async function POST(req: Request) {
     });
 
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    console.error("[x402 API ERROR]:", err);
+    return NextResponse.json({ success: false, error: err.message || "Unknown server error" }, { status: 500 });
   }
 }
