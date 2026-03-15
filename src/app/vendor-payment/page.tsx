@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, Coffee, Package, ShieldCheck, ArrowRightLeft, Loader2, ExternalLink } from "lucide-react";
+import { Wallet, Coffee, Package, ShieldCheck, ArrowRightLeft, Loader2, ExternalLink, CreditCard } from "lucide-react";
 
 // Mock database of items a vendor at the physical event might sell
 const VENDOR_ITEMS = [
@@ -54,6 +54,24 @@ export default function VendorPaymentDashboard() {
     setIsPaying(false);
   };
 
+  const handleRazorpay = async (item: any) => {
+    setSelectedItem(item);
+    setIsPaying(true);
+    setReceipt(null);
+    
+    // Simulating Razorpay popup and processor
+    setTimeout(() => {
+       setReceipt({
+          txHash: "pay_" + Array.from({length: 14}, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+          item: item.name,
+          price: item.price + " (Converted to INR)",
+          vendor: "Razorpay Fiat Gateway",
+          isFiat: true
+       });
+       setIsPaying(false);
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 font-sans selection:bg-[#FF4500] selection:text-white pb-20">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -88,18 +106,33 @@ export default function VendorPaymentDashboard() {
                   <p className="font-mono text-[#00ff9d]">{item.price}</p>
                 </div>
                 
-                <button 
-                  onClick={() => handlePurchase(item)}
-                  disabled={isPaying}
-                  className="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-all bg-[#00ff9d]/10 hover:bg-[#00ff9d]/20 border border-[#00ff9d]/30 text-[#00ff9d] disabled:opacity-50"
-                >
-                  {isPaying && selectedItem?.id === item.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Wallet className="w-4 h-4" />
-                  )}
-                  {isPaying && selectedItem?.id === item.id ? "Processing x402..." : "Pay Vendor"}
-                </button>
+                <div className="w-full space-y-2 mt-4">
+                  <button 
+                    onClick={() => handlePurchase(item)}
+                    disabled={isPaying}
+                    className="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-all bg-[#00ff9d]/10 hover:bg-[#00ff9d]/20 border border-[#00ff9d]/30 text-[#00ff9d] disabled:opacity-50"
+                  >
+                    {isPaying && selectedItem?.id === item.id && !receipt?.isFiat ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Wallet className="w-4 h-4" />
+                    )}
+                    Pay Vendor (x402)
+                  </button>
+
+                  <button 
+                    onClick={() => handleRazorpay(item)}
+                    disabled={isPaying}
+                    className="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-all bg-[#3395ff]/10 hover:bg-[#3395ff]/20 border border-[#3395ff]/30 text-[#3395ff] disabled:opacity-50"
+                  >
+                    {isPaying && selectedItem?.id === item.id && receipt?.isFiat ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CreditCard className="w-4 h-4" />
+                    )}
+                    Razorpay (Card/UPI)
+                  </button>
+                </div>
              </div>
            ))}
         </div>
@@ -143,19 +176,28 @@ export default function VendorPaymentDashboard() {
                    </div>
 
                    {/* TX Hash block isolated for emphasis */}
-                   <div className="w-full md:w-auto self-stretch flex flex-col justify-center border border-[#00ff9d]/20 bg-[#00ff9d]/5 min-w-[300px] rounded-xl p-6 text-center">
-                      <p className="text-xs font-mono uppercase text-zinc-400 tracking-wider mb-2">Immutable Tx Hash</p>
+                   <div className={`w-full md:w-auto self-stretch flex flex-col justify-center border min-w-[300px] rounded-xl p-6 text-center ${receipt.isFiat ? 'border-[#3395ff]/20 bg-[#3395ff]/5' : 'border-[#00ff9d]/20 bg-[#00ff9d]/5'}`}>
+                      <p className="text-xs font-mono uppercase text-zinc-400 tracking-wider mb-2">
+                        {receipt.isFiat ? "Receipt ID" : "Immutable Tx Hash"}
+                      </p>
                       <p className="text-[10px] md:text-xs font-mono text-white break-all mb-4">
                         {receipt.txHash}
                       </p>
-                      <a 
-                        href={`https://explorer.testnet3.goat.network/tx/${receipt.txHash}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center gap-2 text-xs font-mono font-bold text-[#00ff9d] hover:text-white transition-colors"
-                      >
-                         <ExternalLink className="w-3 h-3" /> View on GOAT Explorer
-                      </a>
+                      {!receipt.isFiat && (
+                        <a 
+                          href={`https://explorer.testnet3.goat.network/tx/${receipt.txHash}`} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center gap-2 text-xs font-mono font-bold text-[#00ff9d] hover:text-white transition-colors"
+                        >
+                           <ExternalLink className="w-3 h-3" /> View on GOAT Explorer
+                        </a>
+                      )}
+                      {receipt.isFiat && (
+                        <span className="inline-flex items-center justify-center gap-2 text-xs font-mono font-bold text-[#3395ff]">
+                           <ShieldCheck className="w-3 h-3" /> Verified by Razorpay
+                        </span>
+                      )}
                    </div>
                 </div>
              </motion.div>

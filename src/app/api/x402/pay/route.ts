@@ -21,11 +21,11 @@ export async function POST(req: Request) {
       // Connect our wallet using the custom private key
       const wallet = new ethers.Wallet(privateKey, provider);
       
-      // We send a tiny microtransaction of raw native gas (0.00001) purely to trigger an on-chain event 
+      // We send a tiny microtransaction of raw native gas (0.01) purely to trigger an on-chain event 
       // over to the vendor's public key as proof of x402 payment execution.
       const tx = await wallet.sendTransaction({
         to: vendorAddress,
-        value: ethers.parseEther("0.00001"), 
+        value: ethers.parseEther("0.01"), 
       });
       
       // Note: We are purposely NOT 'await tx.wait()'ing here because we want the UI 
