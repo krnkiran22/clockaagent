@@ -14,6 +14,8 @@ export default function AdminAnnounce() {
   const [isPosting, setIsPosting] = useState(false);
   const [postStatus, setPostStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isTriggering, setIsTriggering] = useState(false);
+  const [triggerStatus, setTriggerStatus] = useState<"idle" | "success" | "error">("idle");
 
   const handleEvaluate = () => {
     setIsEvaluating(true);
@@ -62,6 +64,23 @@ export default function AdminAnnounce() {
     }
     
     setIsPosting(false);
+  };
+
+  const handleTriggerQueue = async () => {
+    setIsTriggering(true);
+    setTriggerStatus("idle");
+    try {
+      const res = await fetch("/api/marathon/status", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setTriggerStatus("success");
+      } else {
+        setTriggerStatus("error");
+      }
+    } catch (e: any) {
+      setTriggerStatus("error");
+    }
+    setIsTriggering(false);
   };
 
   return (
@@ -179,6 +198,24 @@ export default function AdminAnnounce() {
 
                   {postStatus === "error" && (
                     <p className="text-red-500 text-xs font-mono mt-2 text-center">{errorMsg}</p>
+                  )}
+
+                  {postStatus === "success" && (
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      onClick={handleTriggerQueue}
+                      disabled={isTriggering || triggerStatus === "success"}
+                      className="w-full flex items-center justify-center gap-2 bg-[#00ff9d] hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all shadow-[0_4px_20px_rgba(0,255,157,0.3)] disabled:opacity-50 mt-4"
+                    >
+                      {isTriggering ? (
+                        <span className="flex items-center gap-2"><div className="w-4 h-4 rounded-full border-t-2 border-black animate-spin"/> Executing Agent Allocation...</span>
+                      ) : triggerStatus === "success" ? (
+                        <><CheckCircle2 className="w-5 h-5" /> Final Confirmed List Sent</>
+                      ) : (
+                        <><Send className="w-5 h-5" /> Fast-Forward: Trigger Queue Allocation</>
+                      )}
+                    </motion.button>
                   )}
                 </motion.div>
               )}
