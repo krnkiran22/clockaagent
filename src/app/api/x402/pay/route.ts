@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         vendorAddress,
         merchantId,
         {
-          value: ethers.parseEther("0.0001"), 
+          value: ethers.parseEther("0.0005"), 
           gasLimit: 600000 
         }
       );
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       // but attach the x402 JSON payload to ensure it shows on the dashboard.
       tx = await wallet.sendTransaction({
         to: vendorAddress,
-        value: ethers.parseEther("0.0001"),
+        value: ethers.parseEther("0.0005"),
         data: hexData, // This is the x402 "Machine Identity" fingerprint
         gasLimit: 100000
       });
