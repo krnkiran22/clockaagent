@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     
     const privateKey = process.env.AGENT_PRIVATE_KEY;
     const agentId = process.env.AGENT_ID || "258";
-    const registryAddress = process.env.RUNCLUB_AGENT_IDENTITY_ADDRESS || process.env.IDENTITY_REGISTRY || "0xd6DC2dD83Be8F3A9b199c2d1B555845A99b4E560";
+    const registryAddress = process.env.IDENTITY_REGISTRY || "0x556089008Fc0a60cD09390Eca93477ca254A5522";
     
     if (!privateKey) {
       return NextResponse.json({ success: false, error: "Missing Agent Private Key in configuration." }, { status: 500 });
@@ -47,37 +47,24 @@ export async function POST(req: Request) {
     // Create the contract instance for the Facilitator Hub
     const facilitator = new ethers.Contract(registryAddress, facilitatorAbi, wallet);
 
-    console.log("Submitting transaction to GOAT Network...");
+    console.log(`Submitting PROPER x402 transaction to Hub [${registryAddress}]...`);
     
     // We execute the payUsingAgent() function on the official Facilitator Hub.
-    // Using explicit getFunction to ensure we don't hit property undefined issues.
-    const payMethod = facilitator.getFunction("payUsingAgent");
-    if (!payMethod) {
-        throw new Error("Critical: payUsingAgent function not found in contract ABI.");
-    }
-
-    const tx = await payMethod(
+    // This maps the payment to your Agent Identity (258) and your Merchant ID (0xgokkull).
+    const tx = await facilitator.payUsingAgent(
       BigInt(agentId), 
       vendorAddress,
-      merchantId || "",
+      merchantId || "0xgokkull",
       {
         value: ethers.parseEther("0.000001"), 
-        gasLimit: 500000 // Increased gas limit slightly for safety
+        gasLimit: 500000 
       }
     );
     
-    if (!tx) {
-        throw new Error("Blockchain did not return a transaction response. Check wallet balance.");
-    }
-
     console.log(`Transaction submitted! Hash: ${tx.hash}`);
     
     // Wait for the block to be mined to ensure it hits the indexer
     const receipt = await tx.wait();
-    
-    if (!receipt) {
-        throw new Error("Transaction verification failed - block mined but no receipt returned.");
-    }
     
     const txHash = tx.hash;
 
