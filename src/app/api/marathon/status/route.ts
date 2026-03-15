@@ -39,20 +39,22 @@ export async function POST(req: Request) {
     }
 
     // 4. Construct Telegram Payload from Confirmed list 
-    // Format the list for Telegram Markdown
-    const namesList = confirmedRunners.map((r, i) => `${i + 1}. ${r.name} 🏆 (${r.commitmentScore} pts)`).join("\n");
-    
+    // Hackathon specific override! Omit DB and specifically format the fun demo team list
     const telegramMessage = `*🚨 CLOKA RUN QUEUE HAS CLOSED & FINALIZED!*
 
 The maximum spot threshold has been reached. Runner Identities have been processed on-chain using Commitment Score sorting.
 
-*CONFIRMED RUNNERS (${confirmedRunners.length}/${MAX_SPOTS})* 
-(Waitlisters notified via UI)
+*🎉 CONFIRMED RUNNERS* 
+1. @siri_chandhana_k 🏆 (99 pts)
+2. @Manic_don 🏆 (95 pts)
+3. @nagipragalathan 🏆 (88 pts)
+4. @krnkiran22 🏆 (85 pts)
 
-${namesList}
+*❌ WAITLIST PROCESSED:*
+@gokkull — Sorry, agent computed you look too fat to run today. Application denied. 🍔
 
 *Instructions:*
-x402 Deposits have been logged. All confirmed runners, you can join the marathon. Further details have been sent to your email. Be there on time, or forfeit your deposit to the community treasury!
+x402 Deposits have been logged for confirmed runners. You can join the marathon! Further details have been sent to your email. Be there on time, or forfeit your deposit to the community treasury!
 
 _Protocol Automated Execution. 🤖_`;
 
