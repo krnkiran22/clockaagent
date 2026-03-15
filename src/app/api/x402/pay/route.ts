@@ -3,7 +3,12 @@ import { ethers } from 'ethers';
 
 export async function POST(req: Request) {
   try {
-    const { itemId, itemName, price, vendorAddress } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { itemId, itemName, price, vendorAddress } = body;
+
+    if (!vendorAddress) {
+      return NextResponse.json({ success: false, error: "Missing required vendorAddress in request body." }, { status: 400 });
+    }
 
     // The Official GOAT x402 API configuration
     const rpcUrl = process.env.GOATX402_API_URL || "https://rpc.testnet3.goat.network";
