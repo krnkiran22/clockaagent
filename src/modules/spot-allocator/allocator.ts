@@ -12,7 +12,7 @@ export interface AllocationResult {
   waitlistedRunners: Applicant[];
 }
 
-const TOTAL_SPOTS = 130;
+const TOTAL_SPOTS = parseInt(process.env.MAX_PARTICIPANTS || "10", 10);
 
 /**
  * Sorts applicants by commitment score (descending) and assigns spots.

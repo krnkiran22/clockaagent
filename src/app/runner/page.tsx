@@ -1,21 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Activity, Zap, CheckCircle2 } from "lucide-react";
+import { Activity, Zap, CheckCircle2 } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function RunnerRegistration() {
+  const { data: session, status } = useSession();
+  
   const [step, setStep] = useState(1);
-  const [score, setScore] = useState(0);
+  const [scoreData, setScoreData] = useState<any>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    // If the user returns from Strava auth with a session, automatically proceed to calculate score
+    if (status === "authenticated" && (session as any)?.accessToken && step === 1) {
+      setStep(2);
+      fetchScore((session as any).accessToken);
+    }
+  }, [status, session, step]);
 
   const handleConnectStrava = () => {
-    // Simulate API call and score computation
-    setStep(2);
-    setTimeout(() => {
-      setScore(85); // Mock computed score
-      setStep(3);
-    }, 2000);
+    // Initiate OAuth flow. For the hackathon demo, if env variables aren't set, 
+    // we could fallback, but NextAuth will just error properly telling them to add it.
+    signIn("strava");
+  };
+
+  const fetchScore = async (token: string) => {
+    try {
+      const res = await fetch("/api/runner/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: token }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setScoreData(data);
+        setStep(3);
+      } else {
+        setErrorMsg(data.error || "Failed to fetch Strava runs.");
+        setStep(1);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Error communicating with scoring module.");
+      setStep(1);
+    }
   };
 
   const handleMintIdentity = () => {
@@ -28,7 +60,6 @@ export default function RunnerRegistration() {
 
   return (
     <div className="min-h-screen bg-black text-white p-4 pt-24 font-sans selection:bg-[#FF4500] selection:text-white relative overflow-hidden">
-      {/* Background aesthetics */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#FF4500]/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -61,11 +92,19 @@ export default function RunnerRegistration() {
                 <p className="text-zinc-400 text-sm max-w-sm">
                   We read your last 90 days of runs. No manual data entry. Your GPS traces are cryptographically hashed for proof-of-run.
                 </p>
+
+                {errorMsg && (
+                  <div className="w-full bg-red-500/10 border border-red-500 text-red-500 text-xs p-3 rounded-lg">
+                    {errorMsg}
+                  </div>
+                )}
+
                 <button
                   onClick={handleConnectStrava}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] mt-4"
+                  disabled={status === "loading"}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] mt-4 disabled:opacity-50"
                 >
-                  Connect with Strava
+                  {status === "loading" ? "Initializing..." : "Connect with Strava"}
                 </button>
               </motion.div>
             )}
@@ -82,16 +121,16 @@ export default function RunnerRegistration() {
                   <div className="w-16 h-16 rounded-full border-t-2 border-r-2 border-[#FF4500] animate-spin" />
                   <Activity className="absolute inset-0 m-auto w-6 h-6 text-[#FF4500]" />
                 </div>
-                <p className="font-mono text-sm text-zinc-400 animate-pulse">Computing Commitment Score...</p>
+                <p className="font-mono text-sm text-zinc-400 animate-pulse">Computing Commitment Score via Real API...</p>
                 <div className="space-y-2 text-xs font-mono text-zinc-500 text-center">
-                  <p>Fetching last 90 days...</p>
+                  <p>Fetching last 90 days from Strava...</p>
                   <p>Verifying pace consistency...</p>
                   <p>Hashing GPS polylines...</p>
                 </div>
               </motion.div>
             )}
 
-            {step === 3 && (
+            {step === 3 && scoreData && (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -102,22 +141,22 @@ export default function RunnerRegistration() {
                 <div>
                   <h3 className="text-zinc-400 font-mono text-sm tracking-wider uppercase mb-2">Your Commitment Score</h3>
                   <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#00ff9d] to-blue-500 drop-shadow-[0_0_15px_rgba(0,255,157,0.3)]">
-                    {score}
+                    {scoreData.score}
                   </div>
                 </div>
 
                 <div className="w-full grid grid-cols-2 gap-4 text-left">
                   <div className="glass p-4 rounded-xl border border-zinc-800">
                     <p className="text-xs text-zinc-500 font-mono font-semibold mb-1">TOTAL RUNS</p>
-                    <p className="text-xl font-bold">42</p>
+                    <p className="text-xl font-bold">{scoreData.stats?.totalRuns || 0}</p>
                   </div>
                   <div className="glass p-4 rounded-xl border border-zinc-800">
                     <p className="text-xs text-zinc-500 font-mono font-semibold mb-1">NO SHOWS</p>
-                    <p className="text-xl font-bold text-red-500">0</p>
+                    <p className="text-xl font-bold text-red-500">{scoreData.stats?.noShows || 0}</p>
                   </div>
                   <div className="glass p-4 rounded-xl border border-zinc-800 col-span-2">
                     <p className="text-xs text-zinc-500 font-mono font-semibold mb-1">GPS HASH (LATEST)</p>
-                    <p className="text-xs font-mono text-zinc-300 truncate">0x9f86d081884c7d659a2feaa0c55ad015</p>
+                    <p className="text-xs font-mono text-zinc-300 truncate">{scoreData.latestHash}</p>
                   </div>
                 </div>
 

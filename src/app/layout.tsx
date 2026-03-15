@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
-
+import { Providers } from "@/components/providers";
 const inter = Inter({
   variable: "--font-geist-sans", // Keeping variable name for compatibility but using Inter
   subsets: ["latin"],
@@ -29,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${spaceMono.variable} antialiased bg-black text-white selection:bg-[#FF4500]/30 selection:text-white`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

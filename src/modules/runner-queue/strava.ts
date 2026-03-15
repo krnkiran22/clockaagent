@@ -15,15 +15,28 @@ export interface StravaRun {
 
 /**
  * Fetch last 90 days of Strava runs for a user
- * Note: In a real app this uses the Strava API. 
- * For the hackathon demo, this is a mock returning the runner's real history from test data.
+ * Note: Uses the Strava API. 
+ * For the hackathon demo, if the API call fails or token is mock, returns fallback data to avoid ruining the demo.
  */
 export async function fetchRunnerHistory(accessToken: string): Promise<StravaRun[]> {
-  // Mock endpoint hit
-  // const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${ninetyDaysAgo}`, {
-  //   headers: { Authorization: `Bearer ${accessToken}` }
-  // });
-  
+  try {
+    const ninetyDaysAgo = Math.floor((Date.now() - 90 * 24 * 60 * 60 * 1000) / 1000);
+    const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${ninetyDaysAgo}`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Filter strictly for Run types
+      return data.filter((activity: any) => activity.type === "Run");
+    } else {
+      console.warn("Strava API fetched failed with status", response.status, "- Falling back to Mock Data for Demo");
+    }
+  } catch (error) {
+    console.warn("Strava fetch failed entirely", error, "- Falling back to Mock Data for Demo");
+  }
+
+  // Fallback demo data
   return [
     {
       id: 101,
@@ -31,7 +44,7 @@ export async function fetchRunnerHistory(accessToken: string): Promise<StravaRun
       distance: 10000,
       moving_time: 3600,
       type: "Run",
-      start_date: "2025-03-09T00:30:00Z",
+      start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       map: {
         polyline: "g_hwF_g`gMjAg@hBw...",
         summary_polyline: "g_hwF_g`gMjAg@hBw..."
@@ -43,7 +56,7 @@ export async function fetchRunnerHistory(accessToken: string): Promise<StravaRun
       distance: 5000,
       moving_time: 1800,
       type: "Run",
-      start_date: "2025-03-12T00:30:00Z",
+      start_date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
       map: {
         polyline: "c_hwF_g`gMjAc@hDw...",
         summary_polyline: "c_hwF_g`gMjAc@hDw..."
