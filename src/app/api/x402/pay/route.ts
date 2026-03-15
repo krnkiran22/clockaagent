@@ -32,31 +32,33 @@ export async function POST(req: Request) {
         timestamp: Date.now()
     };
 
-    // Construct the authenticated x402 tracking payload so the GOAT indexer strictly registers this as an Agent transaction
-    const agentX402Payload = JSON.stringify({
-        agent_id: agentId,
-        identity_registry: registryAddress,
-        merchant_id: merchantId,
-        protocol: "x402_agent_payment",
-        timestamp: Date.now()
-    });
+    // The Facilitator Contract ABI - strictly following the x402 standard
+    const facilitatorAbi = [
+      "function pay(uint256 agentId, address destination) external payable"
+    ];
 
-    console.log("Executing AUTHENTICATED Agent x402 Payment strictly on-chain via GOAT Network...");
+    console.log(`Executing PROPER x402 Payment via Facilitator [${registryAddress}] for Agent [${agentId}]...`);
 
     // Connect our wallet using the custom private key
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
     
-    // We send a mathematically verified microtransaction of raw native gas (0.00001) purely to trigger an on-chain event 
-    // over to the vendor's public key as proof of x402 payment execution.
-    // We append the custom x402 payload straight into the hex 'data' field for the dashboard to parse, strictly using the Agent wallet!
-    const tx = await wallet.sendTransaction({
-      to: vendorAddress,
-      value: ethers.parseEther("0.00001"),
-      data: ethers.hexlify(ethers.toUtf8Bytes(agentX402Payload))
-    });
+    // Create the contract instance for the Facilitator
+    const facilitator = new ethers.Contract(registryAddress, facilitatorAbi, wallet);
+
+    // We execute the pay() function on the Facilitator.
+    // This is what makes it a "Proper x402" transaction rather than a simple coin transfer.
+    // The Facilitator will emit the necessary events to show up in the GOAT x402 Dashboard.
+    const tx = await facilitator.pay(
+      parseInt(agentId), 
+      vendorAddress, 
+      {
+        value: ethers.parseEther("0.000001"), // Set ultra-low to ensure gas coverage for the contract call
+        gasLimit: 100000 // Ensuring enough gas for the facilitator logic
+      }
+    );
     
-    // Wait for it to be confirmed on the blockchain so it 100% shows up on the explorer natively
+    // Wait for the block to be mined
     await tx.wait();
     
     const txHash = tx.hash;
